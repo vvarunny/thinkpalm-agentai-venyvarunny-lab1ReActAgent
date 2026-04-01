@@ -1,0 +1,46 @@
+import wikipedia
+
+# Step 1: Define the tool
+def wikipedia_tool(query):
+    """Search Wikipedia and return a short summary."""
+    try:
+        summary = wikipedia.summary(query, sentences=2)
+        return summary
+    except wikipedia.exceptions.DisambiguationError as e:
+        return f"Multiple options found: {e.options[:5]}"
+    except wikipedia.exceptions.PageError:
+        return "No page found on Wikipedia."
+    except Exception as e:
+        return f"Error: {e}"
+
+# Step 2: Define the ReAct agent
+def react_agent(user_query):
+    """
+    Minimal ReAct agent:
+    1. Reason step-by-step
+    2. Decide which tool to call
+    3. Return final answer
+    """
+    print("Agent Reasoning:")
+
+    # Step 1: Reasoning
+    print("Step 1: Analyzing the query...")
+    if "who is" in user_query.lower() or "what is" in user_query.lower() or "which is" in user_query.lower():
+        print("Step 2: This looks like a factual question. I should use the Wikipedia tool.")
+
+        # Step 2: Acting (call tool)
+        search_term = user_query.replace("who is", "").replace("what is", "").replace("which is", "").strip()
+        print(f"Step 3: Extracted search term: {search_term}")
+        answer = wikipedia_tool(search_term)
+        print("Step 4: Tool called. Got result.")
+
+        # Step 3: Return final answer
+        return f"Final Answer: {answer}"
+    else:
+        print("Step 2: Not a Wikipedia question. I will answer directly.")
+        return "Final Answer: I can only answer factual questions about people, places, or things using Wikipedia."
+
+# Step 3: Run the agent
+user_query = "which is the first ever book printed?"
+final_answer = react_agent(user_query)
+print("\n" + final_answer)
